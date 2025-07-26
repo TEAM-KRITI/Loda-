@@ -31,11 +31,11 @@ HEROKU_APP_NAME = getenv("HEROKU_APP_NAME")
 HEROKU_API_KEY = getenv("HEROKU_API_KEY")
 
 API_URL = getenv("API_URL", 'https://api.thequickearn.xyz') #youtube song url
-API_KEY = getenv("API_KEY", None) # youtube song api key, generate free key or buy paid plan from panel.thequickearn.xyz
+API_KEY = getenv("API_KEY", 'NxGBNexGenBotsb4f439') # youtube song api ke 
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/TEAM-ISTKHAR/IstkharMusic",
+    "https://github.com/ISTKHAROP/IstkharMusic",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
@@ -43,7 +43,7 @@ GIT_TOKEN = getenv(
 )  # Fill this variable if your upstream repository is private
 
 SUPPORT_CHANNEL = getenv("SUPPORT_CHANNEL", "https://t.me/ARISHFA_UPDATE")
-SUPPORT_GROUP = getenv("SUPPORT_GROUP", "https://t.me/+rHfbX06JYoNlNDg9")
+SUPPORT_GROUP = getenv("SUPPORT_GROUP", "https://t.me/+IvUyIY_vMY1jOTdl")
 
 # Set this to True if you want the assistant to automatically leave chats after an interval
 AUTO_LEAVING_ASSISTANT = bool(getenv("AUTO_LEAVING_ASSISTANT", False))
