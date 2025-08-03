@@ -21,7 +21,7 @@ from IstkharMusic.utils.formatters import get_readable_time
 from IstkharMusic.utils.inline import help_pannel, private_panel, start_panel
 from config import BANNED_USERS
 from strings import get_string
-from AnieXEricaMusic.misc import SUDOERS
+from IstkharMusic.misc import SUDOERS
 
 @app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
