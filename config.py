@@ -84,10 +84,10 @@ confirmer = {}
 
 
 START_IMG_URL = getenv(
-    "START_IMG_URL", "https://files.catbox.moe/eelcv4.jpg"
+    "START_IMG_URL", "https://files.catbox.moe/h381vt.jpg"
 )
 PING_IMG_URL = getenv(
-    "PING_IMG_URL", "https://files.catbox.moe/fa1xas.jpg"
+    "PING_IMG_URL", "https://files.catbox.moe/h381vt.jpg"
 )
 PLAYLIST_IMG_URL = "https://files.catbox.moe/pfjgmf.jpg"
 STATS_IMG_URL = "https://files.catbox.moe/st6utj.jpg"
@@ -120,3 +120,4 @@ if SUPPORT_GROUP:
         raise SystemExit(
             "[ERROR] - Your SUPPORT_GROUP url is wrong. Please ensure that it starts with https://"
         )
+
