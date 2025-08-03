@@ -17,6 +17,7 @@ from IstkharMusic.utils.database import (
     is_banned_user,
     is_on_off,
 )
+from IstkharMusic.utils import bot_sys_stats
 from IstkharMusic.utils.decorators.language import LanguageStart
 from IstkharMusic.utils.formatters import get_readable_time
 from IstkharMusic.utils.inline import help_pannel, private_panel, start_panel
@@ -32,22 +33,22 @@ async def start_pm(client, message: Message, _):
         name = message.text.split(None, 1)[1]
         if name[0:4] == "help":
             keyboard = help_pannel(_)
-            await message.reply_sticker("CAACAgUAAxkBAAIVQWX0AAEa90uHcDE8ToUSWHA-IdZzHAACgxEAAgVqoVdrPxoJcnWZQzQE")
             return await message.reply_photo(
                 photo=config.START_IMG_URL,
-                caption=_["help_1"].format(config.SUPPORT_CHAT),
+                caption=_["help_1"].format(config.SUPPORT_GROUP),
+                protect_content=True,
                 reply_markup=keyboard,
             )
         if name[0:3] == "sud":
             await sudoers_list(client=client, message=message, _=_)
             if await is_on_off(2):
                 return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} 𝐘ᴇ 𝐒ᴛᴀʀᴛ 𝐊ɪʏᴀ 𝐌ᴜᴊʜᴇ 𝐀ʙʜɪ 🐼<b></b>.\n\n<b>𝐈sᴋɪ 𝐔sᴇʀ 𝐈ᴅ 𝐘ᴇ 𝐇ᴀɪ 🐱 :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ 🦋 :</b> @{message.from_user.username}",
+                    chat_id=config.LOG_GROUP_ID,
+                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>sᴜᴅᴏʟɪsᴛ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
                 )
             return
         if name[0:3] == "inf":
-            m = await message.reply_text("🦋")
+            m = await message.reply_text("🔎")
             query = (str(name)).replace("info_", "", 1)
             query = f"https://www.youtube.com/watch?v={query}"
             results = VideosSearch(query, limit=1)
@@ -67,7 +68,7 @@ async def start_pm(client, message: Message, _):
                 [
                     [
                         InlineKeyboardButton(text=_["S_B_8"], url=link),
-                        InlineKeyboardButton(text=_["S_B_9"], url=config.SUPPORT_CHAT),
+                        InlineKeyboardButton(text=_["S_B_9"], url=config.SUPPORT_GROUP),
                     ],
                 ]
             )
@@ -80,20 +81,21 @@ async def start_pm(client, message: Message, _):
             )
             if await is_on_off(2):
                 return await app.send_message(
-                    chat_id=config.LOGGER_ID,
-                    text=f"{message.from_user.mention} 𝐘ᴇ 𝐌ᴜᴊʜᴇ 𝐒ᴛᴀʀᴛ 𝐊ᴀʀᴋᴇ<b>𝐒ᴏɴɢ 𝐊ɪ 𝐈ɴғᴏ 𝐃ᴇᴋʜᴀ</b>.\n\n<b>𝐈sᴋɪ 𝐔sᴇʀ 𝐈ᴅ 𝐘ᴇ 𝐇ᴀɪ 🐱 :</b> <code>{message.from_user.id}</code>\n<b>𝐀ᴜʀ 𝐘ᴇ 𝐈sᴋᴀ 𝐔sᴇʀɴᴀᴍᴇ 𝐇ᴀɪ 🦋 :</b> @{message.from_user.username}",
+                    chat_id=config.LOG_GROUP_ID,
+                    text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ ᴛᴏ ᴄʜᴇᴄᴋ <b>ᴛʀᴀᴄᴋ ɪɴғᴏʀᴍᴀᴛɪᴏɴ</b>.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
                 )
-        else:
+    else:
         out = private_panel(_)
         UP, CPU, RAM, DISK = await bot_sys_stats()
         await message.reply_photo(
             photo=config.START_IMG_URL,
             caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM),
-            reply_markup=InlineKeyboardMarkup(out),        )
+            reply_markup=InlineKeyboardMarkup(out),
+        )
         if await is_on_off(2):
             return await app.send_message(
-                chat_id=config.LOGGER_ID,
-                text=f"{message.from_user.mention} 𝐘ᴇ 𝐒ᴛᴀʀᴛ 𝐊ɪʏᴀ 𝐌ᴜᴊʜᴇ 𝐀ʙʜɪ 🐼.\n\n<b>𝐈sᴋɪ 𝐔sᴇʀ 𝐈ᴅ 𝐘ᴇ 𝐇ᴀɪ 🐱 :</b> <code>{message.from_user.id}</code>\n<b>𝐀ᴜʀ 𝐘ᴇ 𝐈sᴋᴀ 𝐔sᴇʀɴᴀᴍᴇ 𝐇ᴀɪ 🦋 :</b> @{message.from_user.username}",
+                chat_id=config.LOG_GROUP_ID,
+                text=f"{message.from_user.mention} ᴊᴜsᴛ sᴛᴀʀᴛᴇᴅ ᴛʜᴇ ʙᴏᴛ.\n\n<b>ᴜsᴇʀ ɪᴅ :</b> <code>{message.from_user.id}</code>\n<b>ᴜsᴇʀɴᴀᴍᴇ :</b> @{message.from_user.username}",
             )
 
 
@@ -130,7 +132,7 @@ async def welcome(client, message: Message):
                         _["start_5"].format(
                             app.mention,
                             f"https://t.me/{app.username}?start=sudolist",
-                            config.SUPPORT_CHAT,
+                            config.SUPPORT_GROUP,
                         ),
                         disable_web_page_preview=True,
                     )
