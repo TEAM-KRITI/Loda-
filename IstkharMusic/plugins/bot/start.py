@@ -83,14 +83,13 @@ async def start_pm(client, message: Message, _):
                     chat_id=config.LOGGER_ID,
                     text=f"{message.from_user.mention} 𝐘ᴇ 𝐌ᴜᴊʜᴇ 𝐒ᴛᴀʀᴛ 𝐊ᴀʀᴋᴇ<b>𝐒ᴏɴɢ 𝐊ɪ 𝐈ɴғᴏ 𝐃ᴇᴋʜᴀ</b>.\n\n<b>𝐈sᴋɪ 𝐔sᴇʀ 𝐈ᴅ 𝐘ᴇ 𝐇ᴀɪ 🐱 :</b> <code>{message.from_user.id}</code>\n<b>𝐀ᴜʀ 𝐘ᴇ 𝐈sᴋᴀ 𝐔sᴇʀɴᴀᴍᴇ 𝐇ᴀɪ 🦋 :</b> @{message.from_user.username}",
                 )
-    else:
+        else:
         out = private_panel(_)
-        await message.reply_sticker("CAACAgUAAxkBAAIVQWX0AAEa90uHcDE8ToUSWHA-IdZzHAACgxEAAgVqoVdrPxoJcnWZQzQE")
+        UP, CPU, RAM, DISK = await bot_sys_stats()
         await message.reply_photo(
             photo=config.START_IMG_URL,
-            caption=_["start_2"].format(message.from_user.mention, app.mention),
-            reply_markup=InlineKeyboardMarkup(out),
-        )
+            caption=_["start_2"].format(message.from_user.mention, app.mention, UP, DISK, CPU, RAM),
+            reply_markup=InlineKeyboardMarkup(out),        )
         if await is_on_off(2):
             return await app.send_message(
                 chat_id=config.LOGGER_ID,
