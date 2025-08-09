@@ -1,250 +1,184 @@
-# ATLEAST GIVE CREDITS IF YOU STEALING :(((((((((((((((((((((((((((((((((((((
-# ELSE NO FURTHER PUBLIC THUMBNAIL UPDATES
-
-import random
-import logging
 import os
 import re
 import aiofiles
 import aiohttp
-from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont
+import logging
+from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from youtubesearchpython.__future__ import VideosSearch
+from config import YOUTUBE_IMG_URL
+from IstkharMusic import app
 
-logging.basicConfig(level=logging.INFO)
+# Logging Setup
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def changeImageSize(maxWidth, maxHeight, image):
-    widthRatio = maxWidth / image.size[0]
-    heightRatio = maxHeight / image.size[1]
-    newWidth = int(widthRatio * image.size[0])
-    newHeight = int(heightRatio * image.size[1])
-    newImage = image.resize((newWidth, newHeight))
-    return newImage
+# Directories
+CACHE_DIR = "cache"
+os.makedirs(CACHE_DIR, exist_ok=True)
 
-def truncate(text):
-    list = text.split(" ")
-    text1 = ""
-    text2 = ""    
-    for i in list:
-        if len(text1) + len(i) < 30:        
-            text1 += " " + i
-        elif len(text2) + len(i) < 30:       
-            text2 += " " + i
+# Layout Constants
+PANEL_W, PANEL_H = 800, 600
+PANEL_X = (1280 - PANEL_W) // 2
+PANEL_Y = 50
+TRANSPARENCY = 180
+INNER_OFFSET = 40
 
-    text1 = text1.strip()
-    text2 = text2.strip()     
-    return [text1,text2]
+THUMB_W, THUMB_H = 600, 300
+THUMB_X = PANEL_X + (PANEL_W - THUMB_W) // 2
+THUMB_Y = PANEL_Y + INNER_OFFSET
 
-def random_color():
-    return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+TITLE_X = THUMB_X
+META_X = THUMB_X
+TITLE_Y = THUMB_Y + THUMB_H + 20
+META_Y = TITLE_Y + 50
 
-def generate_gradient(width, height, start_color, end_color):
-    base = Image.new('RGBA', (width, height), start_color)
-    top = Image.new('RGBA', (width, height), end_color)
-    mask = Image.new('L', (width, height))
-    mask_data = []
-    for y in range(height):
-        mask_data.extend([int(60 * (y / height))] * width)
-    mask.putdata(mask_data)
-    base.paste(top, (0, 0), mask)
-    return base
+BAR_X, BAR_Y = THUMB_X, META_Y + 40
+BAR_RED_LEN = 300
+BAR_TOTAL_LEN = 600
 
-def add_border(image, border_width, border_color):
-    width, height = image.size
-    new_width = width + 2 * border_width
-    new_height = height + 2 * border_width
-    new_image = Image.new("RGBA", (new_width, new_height), border_color)
-    new_image.paste(image, (border_width, border_width))
-    return new_image
+ICONS_W, ICONS_H = 450, 60
+ICONS_X = PANEL_X + (PANEL_W - ICONS_W) // 2
+ICONS_Y = BAR_Y + 60
 
-def crop_center_circle(img, output_size, border, border_color, crop_scale=1.5):
-    half_the_width = img.size[0] / 2
-    half_the_height = img.size[1] / 2
-    larger_size = int(output_size * crop_scale)
-    img = img.crop(
-        (
-            half_the_width - larger_size/2,
-            half_the_height - larger_size/2,
-            half_the_width + larger_size/2,
-            half_the_height + larger_size/2
-        )
-    )
-    
-    img = img.resize((output_size - 2*border, output_size - 2*border))
-    
-    
-    final_img = Image.new("RGBA", (output_size, output_size), border_color)
-    
-    
-    mask_main = Image.new("L", (output_size - 2*border, output_size - 2*border), 0)
-    draw_main = ImageDraw.Draw(mask_main)
-    draw_main.ellipse((0, 0, output_size - 2*border, output_size - 2*border), fill=255)
-    
-    final_img.paste(img, (border, border), mask_main)
-    
-    
-    mask_border = Image.new("L", (output_size, output_size), 0)
-    draw_border = ImageDraw.Draw(mask_border)
-    draw_border.ellipse((0, 0, output_size, output_size), fill=255)
-    
-    result = Image.composite(final_img, Image.new("RGBA", final_img.size, (0, 0, 0, 0)), mask_border)
-    
-    return result
+MAX_TITLE_WIDTH = PANEL_W - 100
 
-def draw_text_with_shadow(background, draw, position, text, font, fill, shadow_offset=(3, 3), shadow_blur=5):
-    
-    shadow = Image.new('RGBA', background.size, (0, 0, 0, 0))
-    shadow_draw = ImageDraw.Draw(shadow)
-    
-    
-    shadow_draw.text(position, text, font=font, fill="black")
-    
-    
-    shadow = shadow.filter(ImageFilter.GaussianBlur(radius=shadow_blur))
-    
-    
-    background.paste(shadow, shadow_offset, shadow)
-    
-    
-    draw.text(position, text, font=font, fill=fill)
 
-async def gen_thumb(videoid: str):
+def trim_to_width(text: str, font: ImageFont.FreeTypeFont, max_w: int) -> str:
+    ellipsis = "…"
+    text = text[:50]  # Limit title to 50 characters
+    if font.getlength(text) <= max_w:
+        return text
+    for i in range(len(text) - 1, 0, -1):
+        if font.getlength(text[:i] + ellipsis) <= max_w:
+            return text[:i] + ellipsis
+    return ellipsis
+
+
+async def get_thumb(videoid: str) -> str:
+    cache_path = os.path.join(CACHE_DIR, f"{videoid}_v5.png")
+    if os.path.exists(cache_path):
+        return cache_path
+
     try:
-        if os.path.isfile(f"cache/{videoid}_v4.png"):
-            return f"cache/{videoid}_v4.png"
+        results = VideosSearch(f"https://www.youtube.com/watch?v={videoid}", limit=1)
+        results_data = await results.next()
+        data = results_data["result"][0]
+        title = re.sub(r"\W+", " ", data.get("title", "Unsupported Title")).title()
+        thumbnail = data.get("thumbnails", [{}])[0].get("url", YOUTUBE_IMG_URL)
+        duration = data.get("duration")
+        views = data.get("viewCount", {}).get("short", "Unknown Views")
+    except Exception as e:
+        logging.error(f"Error fetching YouTube data: {e}")
+        title, thumbnail, duration, views = "Unsupported Title", YOUTUBE_IMG_URL, None, "Unknown Views"
 
-        url = f"https://www.youtube.com/watch?v={videoid}"
-        results = VideosSearch(url, limit=1)
-        for result in (await results.next())["result"]:
-            title = result.get("title")
-            if title:
-                title = re.sub("\W+", " ", title).title()
-            else:
-                title = "Unsupported Title"
-            duration = result.get("duration")
-            if not duration:
-                duration = "Live"
-            thumbnail_data = result.get("thumbnails")
-            if thumbnail_data:
-                thumbnail = thumbnail_data[0]["url"].split("?")[0]
-            else:
-                thumbnail = None
-            views_data = result.get("viewCount")
-            if views_data:
-                views = views_data.get("short")
-                if not views:
-                    views = "Unknown Views"
-            else:
-                views = "Unknown Views"
-            channel_data = result.get("channel")
-            if channel_data:
-                channel = channel_data.get("name")
-                if not channel:
-                    channel = "Unknown Channel"
-            else:
-                channel = "Unknown Channel"
+    is_live = not duration or str(duration).strip().lower() in {"", "live", "live now"}
+    duration_text = "🔴 LIVE" if is_live else duration or "Unknown Mins"
 
-        
+    thumb_path = os.path.join(CACHE_DIR, f"thumb_{videoid}.jpg")
+    try:
         async with aiohttp.ClientSession() as session:
             async with session.get(thumbnail) as resp:
-        
-                content = await resp.read()
                 if resp.status == 200:
-                    content_type = resp.headers.get('Content-Type')
-                    if 'jpeg' in content_type or 'jpg' in content_type:
-                        extension = 'jpg'
-                    elif 'png' in content_type:
-                        extension = 'png'
-                    else:
-                        logging.error(f"Unexpected content type: {content_type}")
-                        return None
-
-                    filepath = f"cache/thumb{videoid}.png"
-                    f = await aiofiles.open(filepath, mode="wb")
-                    await f.write(await resp.read())
-                    await f.close()
-                    # os.system(f"file {filepath}")
-                    
-        
-        image_path = f"cache/thumb{videoid}.png"
-        youtube = Image.open(image_path)
-        image1 = changeImageSize(1280, 720, youtube)
-        
-        image2 = image1.convert("RGBA")
-        background = image2.filter(filter=ImageFilter.BoxBlur(20))
-        enhancer = ImageEnhance.Brightness(background)
-        background = enhancer.enhance(0.6)
-
-        
-        start_gradient_color = random_color()
-        end_gradient_color = random_color()
-        gradient_image = generate_gradient(1280, 720, start_gradient_color, end_gradient_color)
-        background = Image.blend(background, gradient_image, alpha=0.2)
-        
-        draw = ImageDraw.Draw(background)
-        arial = ImageFont.truetype("IstkharMusic/assets/font2.ttf", 30)
-        font = ImageFont.truetype("IstkharMusic/assets/font.ttf", 30)
-        title_font = ImageFont.truetype("IstkharMusic/assets/font3.ttf", 45)
-
-
-        circle_thumbnail = crop_center_circle(youtube, 400, 20, start_gradient_color)
-        circle_thumbnail = circle_thumbnail.resize((400, 400))
-        circle_position = (120, 160)
-        background.paste(circle_thumbnail, circle_position, circle_thumbnail)
-
-        text_x_position = 565
-        title1 = truncate(title)
-        draw_text_with_shadow(background, draw, (text_x_position, 180), title1[0], title_font, (255, 255, 255))
-        draw_text_with_shadow(background, draw, (text_x_position, 230), title1[1], title_font, (255, 255, 255))
-        draw_text_with_shadow(background, draw, (text_x_position, 320), f"{channel}  |  {views[:23]}", arial, (255, 255, 255))
-
-
-        line_length = 580  
-        line_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-
-        if duration != "Live":
-            color_line_percentage = random.uniform(0.15, 0.85)
-            color_line_length = int(line_length * color_line_percentage)
-            white_line_length = line_length - color_line_length
-
-            start_point_color = (text_x_position, 380)
-            end_point_color = (text_x_position + color_line_length, 380)
-            draw.line([start_point_color, end_point_color], fill=line_color, width=9)
-        
-            start_point_white = (text_x_position + color_line_length, 380)
-            end_point_white = (text_x_position + line_length, 380)
-            draw.line([start_point_white, end_point_white], fill="white", width=8)
-        
-            circle_radius = 10 
-            circle_position = (end_point_color[0], end_point_color[1])
-            draw.ellipse([circle_position[0] - circle_radius, circle_position[1] - circle_radius,
-                      circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
-    
-        else:
-            line_color = (255, 0, 0)
-            start_point_color = (text_x_position, 380)
-            end_point_color = (text_x_position + line_length, 380)
-            draw.line([start_point_color, end_point_color], fill=line_color, width=9)
-        
-            circle_radius = 10 
-            circle_position = (end_point_color[0], end_point_color[1])
-            draw.ellipse([circle_position[0] - circle_radius, circle_position[1] - circle_radius,
-                          circle_position[0] + circle_radius, circle_position[1] + circle_radius], fill=line_color)
-
-        draw_text_with_shadow(background, draw, (text_x_position, 400), "00:00", arial, (255, 255, 255))
-        draw_text_with_shadow(background, draw, (1080, 400), duration, arial, (255, 255, 255))
-        
-        play_icons = Image.open("IstkharMusic/assets/play_icons.png")
-        play_icons = play_icons.resize((580, 62))
-        background.paste(play_icons, (text_x_position, 450), play_icons)
-
-        os.remove(f"cache/thumb{videoid}.png")
-
-        background_path = f"cache/{videoid}_v4.png"
-        background.save(background_path)
-        
-        return background_path
-
+                    async with aiofiles.open(thumb_path, "wb") as f:
+                        await f.write(await resp.read())
+                else:
+                    logging.error(f"Failed to download thumbnail (HTTP {resp.status})")
+                    return YOUTUBE_IMG_URL
     except Exception as e:
-        logging.error(f"Error generating thumbnail for video {videoid}: {e}")
-        traceback.print_exc()
-        return None
+        logging.error(f"Download error: {e}")
+        return YOUTUBE_IMG_URL
+
+    try:
+        base = Image.open(thumb_path).resize((1280, 720)).convert("RGBA")
+        bg = ImageEnhance.Brightness(base.filter(ImageFilter.GaussianBlur(15))).enhance(0.5)
+    except Exception as e:
+        logging.error(f"Image processing error: {e}")
+        return YOUTUBE_IMG_URL
+
+    # Frosted Gradient Panel
+    try:
+        panel_area = bg.crop((PANEL_X, PANEL_Y, PANEL_X + PANEL_W, PANEL_Y + PANEL_H))
+        gradient = Image.new("RGBA", (PANEL_W, PANEL_H), color=0)
+        for y in range(PANEL_H):
+            r = 255
+            g = 255 - int((y / PANEL_H) * 80)
+            b = 255 - int((y / PANEL_H) * 120)
+            a = TRANSPARENCY
+            for x in range(PANEL_W):
+                gradient.putpixel((x, y), (r, g, b, a))
+        frosted = Image.alpha_composite(panel_area, gradient)
+        mask = Image.new("L", (PANEL_W, PANEL_H), 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, 0, PANEL_W, PANEL_H), 35, fill=255)
+        bg.paste(frosted, (PANEL_X, PANEL_Y), mask)
+    except Exception as e:
+        logging.error(f"Panel error: {e}")
+
+    # Thumbnail with Border
+    try:
+        thumb = ImageOps.fit(base, (THUMB_W, THUMB_H), method=Image.Resampling.LANCZOS)
+        tmask = Image.new("L", thumb.size, 0)
+        ImageDraw.Draw(tmask).rounded_rectangle((0, 0, THUMB_W, THUMB_H), 25, fill=255)
+
+        border = Image.new("RGBA", (THUMB_W + 10, THUMB_H + 10), (0, 0, 0, 0))
+        bmask = Image.new("L", (THUMB_W + 10, THUMB_H + 10), 0)
+        ImageDraw.Draw(bmask).rounded_rectangle((0, 0, THUMB_W + 10, THUMB_H + 10), 30, fill=255)
+
+        bg.paste(border, (THUMB_X - 5, THUMB_Y - 5), bmask)
+        bg.paste(thumb, (THUMB_X, THUMB_Y), tmask)
+    except Exception as e:
+        logging.error(f"Thumbnail error: {e}")
+
+    try:
+        title_font = ImageFont.truetype("AnonMusic/assets/thumb/font2.ttf", 30)
+        meta_font = ImageFont.truetype("AnonMusic/assets/thumb/font.ttf", 22)
+        draw = ImageDraw.Draw(bg)
+
+        title_text = trim_to_width(title, title_font, MAX_TITLE_WIDTH)
+        draw.text((TITLE_X, TITLE_Y), title_text, fill="white", font=title_font)
+
+        draw.text((META_X, META_Y), f"YouTube | {views}           Player : @{app.username}", fill="#FF0000", font=meta_font)
+
+        if is_live:
+            live_font = ImageFont.truetype("AnonMusic/assets/thumb/font2.ttf", 22)
+            draw.ellipse((META_X + 200, META_Y - 5, META_X + 225, META_Y + 20), fill=(255, 0, 0, 255))
+            draw.text((META_X + 230, META_Y), "LIVE", fill="red", font=live_font)
+    except Exception as e:
+        logging.error(f"Text rendering error: {e}")
+
+    # Progress Bar
+    try:
+        draw.line([(BAR_X, BAR_Y), (BAR_X + BAR_RED_LEN, BAR_Y)], fill="#FF0000", width=10)
+        draw.ellipse([(BAR_X - 5, BAR_Y - 5), (BAR_X + 5, BAR_Y + 5)], fill="#FF0000")
+        draw.line([(BAR_X + BAR_RED_LEN, BAR_Y), (BAR_X + BAR_TOTAL_LEN, BAR_Y)], fill="#555555", width=6)
+        draw.ellipse([(BAR_X + BAR_TOTAL_LEN - 5, BAR_Y - 5), (BAR_X + BAR_TOTAL_LEN + 5, BAR_Y + 5)], fill="#555555")
+
+        draw.text((BAR_X, BAR_Y + 20), "00:00", fill="white", font=meta_font)
+        draw.text((BAR_X + BAR_TOTAL_LEN - 100, BAR_Y + 20), duration_text,
+                  fill="#FF0000" if is_live else "white", font=meta_font)
+    except Exception as e:
+        logging.error(f"Progress bar error: {e}")
+
+    # Icons
+    try:
+        icons_path = "AnonMusic/assets/thumb/play_icons.png"
+        if os.path.isfile(icons_path):
+            icons = Image.open(icons_path).resize((ICONS_W, ICONS_H)).convert("RGBA")
+        else:
+            icons = Image.new("RGBA", (ICONS_W, ICONS_H), (0, 0, 0, 0))
+            d = ImageDraw.Draw(icons)
+            d.polygon([(20, 10), (20, 50), (60, 30)], fill="white")
+        bg.paste(icons, (ICONS_X, ICONS_Y), icons)
+    except Exception as e:
+        logging.error(f"Icons error: {e}")
+
+    # Save and Cleanup
+    try:
+        os.remove(thumb_path)
+    except Exception as e:
+        logging.error(f"Cleanup error: {e}")
+
+    try:
+        bg.save(cache_path, quality=95)
+        return cache_path
+    except Exception as e:
+        logging.error(f"Save error: {e}")
+        return YOUTUBE_IMG_URL
