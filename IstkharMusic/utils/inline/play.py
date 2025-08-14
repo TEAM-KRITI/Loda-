@@ -65,10 +65,10 @@ def stream_markup_timer(_, chat_id, played, dur):
         ],
       [
             InlineKeyboardButton(
-                text="ᴏᴡɴᴇʀ", url="https://t.me/ll_ISTKHAR_BABY_lll",
+                text="ᴏᴡɴᴇʀ", url="https://t.me/lll_BADNAM_BABY_lll",
             ),
             InlineKeyboardButton(
-                text="sᴜᴩᴩᴏʀᴛ", url="https://t.me/iamIstkhar",
+                text="sᴜᴩᴩᴏʀᴛ", url="https://t.me/+Ius6mdxOqpFjNWM9",
             )
         ],
          [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
@@ -87,10 +87,10 @@ def stream_markup(_, chat_id):
          ],
         [
             InlineKeyboardButton(
-                text="ᴏᴡɴᴇʀ", url="https://t.me/ll_istkhar_baby_lll",
+                text="ᴏᴡɴᴇʀ", url="https://t.me/lll_BADNAM_BABY_lll",
             ),
             InlineKeyboardButton(
-                text="sᴜᴩᴩᴏʀᴛ", url="https://t.me/+rHfbX06JYoNlNDg9",
+                text="sᴜᴩᴩᴏʀᴛ", url="https://t.me/+Ius6mdxOqpFjNWM9",
             )
         ],
         [InlineKeyboardButton(text=_["CLOSE_BUTTON"], callback_data="close")],
@@ -168,3 +168,4 @@ def slider_markup(_, videoid, user_id, query, query_type, channel, fplay):
     ]
     return buttons
     
+
