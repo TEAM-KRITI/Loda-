@@ -1,7 +1,7 @@
 <h1 align="center">🎵 Istkhar Music🎵</h1>
 
 <p align="center">
-  <img src="https://files.catbox.moe/k1gf6k.jpg" alt="Istkhar Music Logo" width="600" height="150">
+  <img src="https://files.catbox.moe/ttj1ql.jpg" alt="Istkhar Music Logo" width="600" height="150">
 </p>
 
 <p align="center">
@@ -54,7 +54,7 @@
 <h2 align="center">🚀 One-Click Deploy to Heroku</h2>
 
 <p align="center">
-  <a href="https://dashboard.heroku.com/new?template=https://github.com/Badnam019/IstkharMusic">
+  <a href="https://dashboard.heroku.com/new?template=https://github.com/TEAM-KRITI/Loda-">
     <img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy to Heroku" />
   </a>
 </p>
