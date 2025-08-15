@@ -1,4 +1,4 @@
-<h1 align="center">🎵 Istkhar Music🎵</h1>
+<h1 align="center">🎵 BADNAM MUSIC 🎵</h1>
 
 <p align="center">
   <img src="https://files.catbox.moe/ttj1ql.jpg" alt="Istkhar Music Logo" width="600" height="150">
