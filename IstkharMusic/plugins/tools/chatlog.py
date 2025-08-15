@@ -11,11 +11,11 @@ from pathlib import Path
 from pyrogram.enums import ParseMode
 
 photo = [
-    "https://envs.sh/MyL.jpg",
-    "https://telegra.ph/file/3ef2cc0ad2bc548bafb30.jpg",
-    "https://envs.sh/MyK.jpg",
-    "https://telegra.ph/file/6f19dc23847f5b005e922.jpg",
-    "https://telegra.ph/file/2973150dd62fd27a3a6ba.jpg",
+    "https://files.catbox.moe/ipr8f3.jpg",
+    "https://files.catbox.moe/ipr8f3.jpg",
+    "https://files.catbox.moe/ipr8f3.jpg",
+    "https://files.catbox.moe/ipr8f3.jpg",
+    "https://files.catbox.moe/ipr8f3.jpg",
 ]
 
 @app.on_message(filters.new_chat_members, group=2)
@@ -26,17 +26,17 @@ async def join_watcher(_, message):
         if member.id == app.id:
             count = await app.get_chat_members_count(chat.id)
             msg = (
-                f"📝 ᴍᴜsɪᴄ ʙᴏᴛ ᴀᴅᴅᴇᴅ ɪɴ ᴀ ɴᴇᴡ ɢʀᴏᴜᴘ\n\n"
-                f"____________________________________\n\n"
-                f"📌 ᴄʜᴀᴛ ɴᴀᴍᴇ: {chat.title}\n"
-                f"🍂 ᴄʜᴀᴛ ɪᴅ: {chat.id}\n"
-                f"🔐 ᴄʜᴀᴛ ᴜsᴇʀɴᴀᴍᴇ: @{chat.username}\n"
-                f"🛰 ᴄʜᴀᴛ ʟɪɴᴋ: [ᴄʟɪᴄᴋ]({link})\n"
-                f"📈 ɢʀᴏᴜᴘ ᴍᴇᴍʙᴇʀs: {count}\n"
-                f"🤔 ᴀᴅᴅᴇᴅ ʙʏ: {message.from_user.mention}"
+                f"#𝗕𝗢𝗧_𝗔𝗗𝗗𝗘𝗗_𝗡𝗘𝗪_𝗚𝗥𝗢𝗨𝗣\n\n"
+                f"⦿───────────────────⦿\n\n"
+                f"◎ ᴄʜᴀᴛ ɴᴀᴍᴇ: {chat.title}\n"
+                f"◎ ᴄʜᴀᴛ ɪᴅ: {chat.id}\n"
+                f"◎ ᴄʜᴀᴛ ᴜsᴇʀɴᴀᴍᴇ ▸ : @{chat.username}\n"
+                f"◎ ᴄʜᴀᴛ ʟɪɴᴋ ▸ : [ᴄʟɪᴄᴋ]({link})\n"
+                f"◎ ɢʀᴏᴜᴘ ᴍᴇᴍʙᴇʀs ▸: {count}\n"
+                f"◎ ᴀᴅᴅᴇᴅ ʙʏ ▸: {message.from_user.mention}"
             )
             await app.send_photo(LOG_GROUP_ID, photo=random.choice(photo), caption=msg, reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton(f"sᴇᴇ ɢʀᴏᴜᴘ👀", url=f"{link}")]
+                [InlineKeyboardButton(f"𝗚𝗥𝗢𝗨𝗣_#𝗟𝗜𝗡𝗞", url=f"{link}")]
             ]))
 
 @app.on_message(filters.left_chat_member)
