@@ -36,7 +36,7 @@ API_KEY = getenv("API_KEY", 'NxGBNexGenBotsb4f439') # youtube song api ke
 
 UPSTREAM_REPO = getenv(
     "UPSTREAM_REPO",
-    "https://github.com/Badnam019/IstkharMusic",
+    "https://github.com/TEAM-KRITI/Loda-",
 )
 UPSTREAM_BRANCH = getenv("UPSTREAM_BRANCH", "main")
 GIT_TOKEN = getenv(
@@ -121,6 +121,7 @@ if SUPPORT_GROUP:
         raise SystemExit(
             "[ERROR] - Your SUPPORT_GROUP url is wrong. Please ensure that it starts with https://"
         )
+
 
 
 
