@@ -8,18 +8,18 @@ from config import LOGGER_ID
 async def play_logs(message, streamtype):
     if await is_on_off(2):
         logger_text = f"""
-<b>{app.mention} ɱυʂιƈ ɾҽƈσԃʂ</b>
+<b>{app.mention} ❖ ᴘʟᴀʏ ʟᴏɢ</b>
 
-<b>ƈԋαƚ ιԃ :</b> <code>{message.chat.id}</code>
-<b>ƈԋαƚ ɳαɱҽ:</b> {message.chat.title}
-<b>ƈԋαƚ υʂҽɾɳαɱҽ :</b> @{message.chat.username}
+<b>● ᴄʜᴀᴛ ɪᴅ ➠ :</b> <code>{message.chat.id}</code>
+<b>● ᴄʜᴀᴛ ɴᴀᴍᴇ ➠:</b> {message.chat.title}
+<b>● ᴄʜᴀᴛ ᴜsᴇʀɴᴀᴍᴇ ➠ :</b> @{message.chat.username}
 
-<b>υʂҽɾ ιԃ:</b> <code>{message.from_user.id}</code>
-<b>ɳαɱҽ :</b> {message.from_user.mention}
-<b>υʂҽɾ ɳαɱҽ :</b> @{message.from_user.username}
+<b>● ᴜsᴇʀ ɪᴅ ➠:</b> <code>{message.from_user.id}</code>
+<b>● ɴᴀᴍᴇ ➠ :</b> {message.from_user.mention}
+<b>● ᴜsᴇʀɴᴀᴍᴇ ➠ :</b> @{message.from_user.username}
 
-<b>ϙυҽɾყ :</b> {message.text.split(None, 1)[1]}
-<b>ʂƚɾҽαɱƚყρҽ :</b> {streamtype}"""
+<b>● ǫᴜᴇʀʏ ➠ :</b> {message.text.split(None, 1)[1]}
+<b>● sᴛʀᴇᴀᴍᴛʏᴘᴇ ➠ :</b> {streamtype}"""
         if message.chat.id != LOGGER_ID:
             try:
                 await app.send_message(
